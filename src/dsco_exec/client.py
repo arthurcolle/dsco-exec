@@ -45,17 +45,20 @@ class Client:
         return json.loads(content[0]["text"]) if content else result
 
     def twap(self, side: str, quantity: float, start: str, end: str, *, slices: int = 12,
-             lot_size: float = 1, min_clip: float = 0) -> Dict[str, Any]:
+             lot_size: float = 1, min_clip: float = 0, **options: Any) -> Dict[str, Any]:
+        """options: randomize, seed, reference_price, aggression_bps."""
         return self.call("twap_schedule", side=side, quantity=quantity, start=start, end=end,
-                         slices=slices, lot_size=lot_size, min_clip=min_clip)
+                         slices=slices, lot_size=lot_size, min_clip=min_clip, **options)
 
     def vwap(self, side: str, quantity: float, start: str, end: str, *,
              volume_profile: Optional[Sequence[float]] = None, expected_total_volume: Optional[float] = None,
-             max_participation: float = 1.0, lot_size: float = 1, min_clip: float = 0) -> Dict[str, Any]:
+             max_participation: float = 1.0, lot_size: float = 1, min_clip: float = 0,
+             profile: str = "us_equity", buckets: Optional[int] = None, **options: Any) -> Dict[str, Any]:
+        """profile: us_equity | crypto_24h | flat. options: randomize, seed, reference_price, aggression_bps."""
         return self.call("vwap_schedule", side=side, quantity=quantity, start=start, end=end,
                          volume_profile=list(volume_profile) if volume_profile else None,
                          expected_total_volume=expected_total_volume, max_participation=max_participation,
-                         lot_size=lot_size, min_clip=min_clip)
+                         lot_size=lot_size, min_clip=min_clip, profile=profile, buckets=buckets, **options)
 
     def almgren_chriss(self, side: str, quantity: float, start: str, end: str, *, volatility: float,
                        temporary_impact: float, permanent_impact: float = 0, risk_aversion: float = 1e-6,
@@ -64,6 +67,27 @@ class Client:
                          volatility=volatility, temporary_impact=temporary_impact,
                          permanent_impact=permanent_impact, risk_aversion=risk_aversion,
                          half_spread=half_spread, slices=slices, lot_size=lot_size)
+
+    def pov(self, side: str, quantity: float, start: str, end: str, *, target_participation: float,
+            forecast_volume: Sequence[float], lot_size: float = 1, **options: Any) -> Dict[str, Any]:
+        return self.call("pov_schedule", side=side, quantity=quantity, start=start, end=end,
+                         target_participation=target_participation, forecast_volume=list(forecast_volume),
+                         lot_size=lot_size, **options)
+
+    def replan(self, side: str, quantity: float, start: str, end: str, *, now: str, filled_quantity: float,
+               remaining_slices: int = 6, urgency: float = 0.5, expected_volume_to_now: Optional[float] = None,
+               realized_volume_to_now: Optional[float] = None, lot_size: float = 1, **options: Any) -> Dict[str, Any]:
+        return self.call("adaptive_reschedule", side=side, quantity=quantity, start=start, end=end, now=now,
+                         filled_quantity=filled_quantity, remaining_slices=remaining_slices, urgency=urgency,
+                         expected_volume_to_now=expected_volume_to_now,
+                         realized_volume_to_now=realized_volume_to_now, lot_size=lot_size, **options)
+
+    def impact(self, quantity: float, average_daily_volume: float, daily_volatility: float, *,
+               spread_bps: float = 0, horizon_days: float = 1, max_cost_bps: Optional[float] = None,
+               impact_coefficient: float = 0.7) -> Dict[str, Any]:
+        return self.call("impact_estimate", quantity=quantity, average_daily_volume=average_daily_volume,
+                         daily_volatility=daily_volatility, spread_bps=spread_bps, horizon_days=horizon_days,
+                         max_cost_bps=max_cost_bps, impact_coefficient=impact_coefficient)
 
     def report(self, side: str, fills: List[Dict[str, Any]], arrival_price: float, *,
                market_vwap: Optional[float] = None, intended_quantity: Optional[float] = None,

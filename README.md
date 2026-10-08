@@ -26,4 +26,9 @@ quality = ex.report("buy", fills=[{"price": 101.2, "quantity": 600}, {"price": 1
 print(quality["implementation_shortfall_bps"], quality["vs_vwap_bps"])
 ```
 
+More: `ex.pov(...)` percentage-of-volume, `ex.replan(...)` adaptive catch-up from live fills,
+`ex.impact(...)` square-root pre-trade cost and the horizon for a cost budget. Every schedule accepts
+`randomize=0.2, seed=42` (anti-gaming jitter), `reference_price=..., aggression_bps=...` (child limits),
+and VWAP takes `profile="crypto_24h"` with `buckets=96`.
+
 Schedules are advice: you place child orders with your own broker. Nothing here holds funds or routes orders.
