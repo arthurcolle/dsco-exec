@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dsco-exec"
+version = "0.1.0"
+description = "TWAP, VWAP and Almgren-Chriss execution schedules plus execution-quality reports, via distributed.systems"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = []
+
+[project.scripts]
+dsco-exec = "dsco_exec.__main__:main"
+
+[project.urls]
+Homepage = "https://distributed.systems"
